@@ -1,16 +1,27 @@
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
 import { NextRequest } from "next/server";
 
-export default withAuth(
-    async function middleware(request: NextRequest) {
-        // console.log(request); 
-    }, {
-        isReturnToCurrentPage: true,
-    }
-)
+export default function middleware(req: NextRequest) {
+  return withAuth(req);
+}
 
 export const config = {
-    matcher: [
-        '/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|login|$).*)',
-    ]
-}
+  matcher: [
+    // Run on everything but Next internals and static files
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+  ],
+};
+
+// export default withAuth(
+//     async function middleware(request: NextRequest) {
+//         // console.log(request);
+//     }, {
+//         isReturnToCurrentPage: true,
+//     }
+// )
+
+// export const config = {
+//     matcher: [
+//         '/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|login|$).*)',
+//     ]
+// }
