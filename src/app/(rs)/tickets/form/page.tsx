@@ -6,7 +6,7 @@ import TicketForm from "./TicketForm";
 
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { Users, init as kindeInit } from "@kinde/management-api-js";
-import { string } from "zod";
+
 
 export async function generateMetadata({
   searchParams,
@@ -137,7 +137,7 @@ export default async function TicketFormPage({
         );
       } else {
         const isEditable =
-          user.email?.toLowerCase() === ticket.tech.toLowerCase();
+          user?.email?.toLowerCase() === ticket.tech.toLowerCase();
         return (
           <TicketForm
             customer={customer}
