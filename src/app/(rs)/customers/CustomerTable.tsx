@@ -92,8 +92,9 @@ export default function CustomerTable({ data }: Props) {
       cell: ActionsCell
     }),
     ...columnHeadersArray.map((columnName) => {
+      const colName = columnName as string
       return columnHelper.accessor(columnName, {
-        id: columnName,
+        id: colName,
         header: columnName[0].toUpperCase() + columnName.slice(1),
       });
     }),
