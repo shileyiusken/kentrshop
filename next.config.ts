@@ -13,5 +13,5 @@ export default withSentryConfig(nextConfig, {
 
   silent: false, // Can be used to suppress logs
 
-  disableLogger: true,
+  // disableLogger: true,
 });
