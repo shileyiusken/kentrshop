@@ -106,14 +106,14 @@ export default function CustomerTable({ data }: Props) {
   });
 
   return (
-    <div className="mt-6 rounded-lg overflow-hidden border border-border">
-      <Table className="border">
+    <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <Table className="min-w-[760px] border-0">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className={`bg-secondary ${header.id === 'actions' ? 'w-12' : ''}`}>
+                  <TableHead key={header.id} className={`h-12 bg-muted/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground ${header.id === 'actions' ? 'w-14' : ''}`}>
                     <div className={`${header.id === 'actions' ? 'flex justify-center items-center' : ''}`}>
                       {header.isPlaceholder
                         ? null
@@ -132,10 +132,10 @@ export default function CustomerTable({ data }: Props) {
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
-              className="cursor-pointer hover:bg-border/25 dark:hover:bg-ring/40"
+                className="hover:bg-muted/60"
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="border">
+                <TableCell key={cell.id} className="border-b border-border/70 px-3 py-3.5">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}

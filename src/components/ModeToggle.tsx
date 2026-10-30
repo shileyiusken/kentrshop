@@ -16,8 +16,11 @@ export function ModeToggle() {
   return (
     <Button
       variant="ghost"
-      className="group/toggle h-8 w-8 px-0"
+      size="icon"
+      className="rounded-lg"
       onClick={toggleTheme}
+      aria-label="Toggle color theme"
+      title="Toggle color theme"
     >
       <SunIcon className="hidden [html.dark_&]:block" />
       <MoonIcon className="hidden [html.light_&]:block" />

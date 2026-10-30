@@ -21,6 +21,8 @@ import { LoaderCircle } from "lucide-react";
 import { DisplayServerActionResponse } from "@/components/DisplayServerActionResponse";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, ContactRound } from "lucide-react";
 
 
 type Props = {
@@ -98,21 +100,27 @@ export default function CustomerForm({ customer, isManager = false }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-1 sm:px-8">
+    <div className="mx-auto max-w-5xl space-y-6">
       <DisplayServerActionResponse result={saveResult} />
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold">
+      <div>
+        <Link href="/customers" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="size-4" /> Back to customers
+        </Link>
+        <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.17em] text-primary"><ContactRound className="size-4" /> Customer record</p>
+        <h1 className="text-3xl font-semibold tracking-tight">
           {customer?.id ? "Edit" : "New"} Customer{" "}
           {customer?.id ? `#${customer.id}` : "Form"}
-        </h2>
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">Keep contact and address information accurate for a smooth repair experience.</p>
       </div>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(submitForm)}
-          className="flex flex-col sm:flex-row gap-4 sm:gap-8"
+          className="grid gap-5 lg:grid-cols-2"
         >
-          <div className="flex flex-col gap-4 w-full max-w-xs">
+          <div className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+            <div className="border-b pb-4"><h2 className="font-semibold">Contact information</h2><p className="mt-1 text-sm text-muted-foreground">Who should we contact about the repair?</p></div>
             <InputWithLabel<insertCustomerSchemaType>
               fieldTitle="First Name"
               nameInSchema="firstName"
@@ -139,7 +147,8 @@ export default function CustomerForm({ customer, isManager = false }: Props) {
               data={StatesArray}
             />
           </div>
-          <div className="flex flex-col gap-4 w-full max-w-xs">
+          <div className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+            <div className="border-b pb-4"><h2 className="font-semibold">Address and notes</h2><p className="mt-1 text-sm text-muted-foreground">Add a location and any useful customer context.</p></div>
             <InputWithLabel<insertCustomerSchemaType>
               fieldTitle="Zip Code"
               nameInSchema="zip"
@@ -155,7 +164,7 @@ export default function CustomerForm({ customer, isManager = false }: Props) {
             <TextAreaWithLabel<insertCustomerSchemaType>
               fieldTitle="Notes"
               nameInSchema="notes"
-              className="h-40"
+              className="min-h-32 resize-y"
             />
             {isManager && customer?.id ? (
               <CheckboxWithLabel<insertCustomerSchemaType>
@@ -165,10 +174,10 @@ export default function CustomerForm({ customer, isManager = false }: Props) {
               />
             ) : null}
 
-            <div className="flex gap-2 mt-3">
+            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row">
               <Button
                 type="submit"
-                className="w-3/4"
+                className="h-10 flex-1 rounded-xl"
                 variant="default"
                 title="Save"
                 disabled={isSaving}
@@ -183,14 +192,15 @@ export default function CustomerForm({ customer, isManager = false }: Props) {
               </Button>
               <Button
                 type="button"
-                variant="destructive"
+                variant="outline"
+                className="h-10 rounded-xl"
                 title="Reset"
                 onClick={() => {
                   form.reset(defaultValues);
                   resetSaveAction();
                 }}
               >
-                Reset
+                Reset changes
               </Button>
             </div>
           </div>

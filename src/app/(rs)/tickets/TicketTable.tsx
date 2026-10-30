@@ -79,6 +79,17 @@ export default function TicketTable({ data }: Props) {
     email: 225,
   };
 
+  const columnLabels: Record<keyof RowType, string> = {
+    id: "Ticket",
+    ticketDate: "Created",
+    title: "Repair",
+    tech: "Technician",
+    firstName: "Customer first name",
+    lastName: "Customer last name",
+    email: "Email",
+    completed: "Status",
+  };
+
   const columnHelper = createColumnHelper<RowType>();
 
   const columns = columnHeadersArray.map((columnName) => {
@@ -113,7 +124,7 @@ export default function TicketTable({ data }: Props) {
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
             >
-              {columnName[0].toUpperCase() + columnName.slice(1)}
+              {columnLabels[columnName]}
 
               {column.getIsSorted() === "asc" && (
                 <ArrowUp className="ml-2 h-4 w-4" />
@@ -135,13 +146,12 @@ export default function TicketTable({ data }: Props) {
           const value = getValue();
           if (columnName === "completed") {
             return (
-              <div className="grid place-content-center">
-                {value === "OPEN" ? (
-                  <CircleXIcon className="opacity-25" />
-                ) : (
-                  <CircleCheckIcon className="text-green-600" />
-                )}
-              </div>
+              <span className={value === "OPEN"
+                ? "inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                : "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"}>
+                {value === "OPEN" ? <CircleXIcon className="size-3.5" /> : <CircleCheckIcon className="size-3.5" />}
+                {value === "OPEN" ? "Open" : "Completed"}
+              </span>
             );
           }
           return value;
@@ -182,16 +192,20 @@ export default function TicketTable({ data }: Props) {
   }, [table.getState().columnFilters]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="mt-6 flex flex-col gap-4">
-      <div className="rounded-lg overflow-hidden border border-border">
-        <Table className="border">
+    <section className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <h2 className="text-sm font-semibold">Ticket list</h2>
+        <span className="text-xs text-muted-foreground">Select a row to open ticket details</span>
+      </div>
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+        <Table className="min-w-[930px] border-0">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="bg-secondary p-1"
+                    className="h-12 bg-muted/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
                     style={{ width: header.getSize() }}
                   >
                     <div className="">
@@ -221,13 +235,21 @@ export default function TicketTable({ data }: Props) {
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className="cursor-pointer hover:bg-border/25 dark:hover:bg-ring/40"
+                className="cursor-pointer hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                role="link"
+                tabIndex={0}
                 onClick={() =>
                   router.push(`/tickets/form?ticketId=${row.original.id}`)
                 }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    router.push(`/tickets/form?ticketId=${row.original.id}`);
+                  }
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="border">
+                  <TableCell key={cell.id} className="border-b border-border/70 px-3 py-3.5 last:border-r-0">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -236,38 +258,34 @@ export default function TicketTable({ data }: Props) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center gap-1 flex-wrap">
-        <div>
-          <p className="whitespace-nowrap font-bold">
-            {`Page ${
-              table.getState().pagination.pageIndex + 1
-            } of ${Math.max(1, table.getPageCount())}`}
-            &nbsp;&nbsp;
-            {`[${table.getFilteredRowModel().rows.length}] ${
-              table.getFilteredRowModel().rows.length !== 1
-                ? "total results"
-                : "result"
-            }`}
-          </p>
-        </div>
-        <div className="flex flex-row gap-1">
-          <div className="flex flex-row gap-1">
-            <Button variant="outline" onClick={() => router.refresh()}>
+      <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4">
+        <p className="text-sm text-muted-foreground">
+          Page <span className="font-semibold text-foreground">{table.getState().pagination.pageIndex + 1}</span> of <span className="font-semibold text-foreground">{Math.max(1, table.getPageCount())}</span>
+          <span className="mx-2 text-border">·</span>
+          <span className="font-semibold text-foreground">{table.getFilteredRowModel().rows.length}</span> {table.getFilteredRowModel().rows.length !== 1 ? "results" : "result"}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            <Button size="sm" variant="outline" className="rounded-lg" onClick={() => router.refresh()}>
               Refresh Data
             </Button>
-            <Button variant="outline" onClick={() => table.resetSorting()}>
+            <Button size="sm" variant="outline" className="rounded-lg" onClick={() => table.resetSorting()}>
               Reset Sorting
             </Button>
             <Button
+              size="sm"
               variant="outline"
+              className="rounded-lg"
               onClick={() => table.resetColumnFilters()}
             >
               Reset Filters
             </Button>
           </div>
-          <div className="flex flex-row gap-1">
+          <div className="flex gap-1.5">
             <Button
+              size="sm"
               variant="outline"
+              className="rounded-lg"
               onClick={() => {
                 const newIndex = table.getState().pagination.pageIndex - 1;
                 table.setPageIndex(newIndex);
@@ -280,7 +298,9 @@ export default function TicketTable({ data }: Props) {
               Previous
             </Button>
             <Button
+              size="sm"
               variant="outline"
+              className="rounded-lg"
               onClick={() => {
                 const newIndex = table.getState().pagination.pageIndex + 1;
                 table.setPageIndex(newIndex);
@@ -295,6 +315,6 @@ export default function TicketTable({ data }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

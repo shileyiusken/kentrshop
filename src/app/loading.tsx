@@ -1,11 +1,12 @@
-import { LoaderCircle } from "lucide-react";
+import { Wrench } from "lucide-react";
 
 export default function Loading() {
     return (
-        <div className="fixed inset-0 z-50 bg-background/80">
-            <div className="w-full h-dvh grid place-content-center">
-                <LoaderCircle className="h-48 w-48 animate-spin text-foreground/20" />
-            </div>
+    <div className="grid min-h-[60vh] place-items-center" role="status" aria-label="Loading workshop">
+        <div className="flex items-center gap-3 rounded-2xl border bg-card px-5 py-4 shadow-sm">
+            <span className="grid size-9 place-items-center rounded-xl bg-accent text-primary"><Wrench className="size-4 animate-pulse" /></span>
+            <span className="text-sm font-medium text-muted-foreground">Loading workshop…</span>
         </div>
+    </div>
     )
 }

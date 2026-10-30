@@ -49,7 +49,7 @@ export function SelectWithLabel<S>({
             <FormControl>
               <SelectTrigger
                 id={nameInSchema}
-                className={`w-full max-w-xs ${className}`}
+                className={`h-10 w-full rounded-lg bg-background ${className}`}
               >
                 <SelectValue placeholder="Select One ..." />
               </SelectTrigger>
