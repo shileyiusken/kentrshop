@@ -5,6 +5,7 @@ import CustomerTable from "./CustomerTable";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, UserRoundPlus, UsersRound } from "lucide-react";
+import { getCurrentStaff } from "@/lib/staff";
 
 export const metadata = {
   title: "Customer Search",
@@ -15,6 +16,11 @@ const Customers = async ({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
+  const staff = await getCurrentStaff();
+  if (staff?.role !== "manager") {
+    return <section className="mx-auto max-w-xl rounded-2xl border bg-card p-8 text-center shadow-sm"><UsersRound className="mx-auto size-9 text-muted-foreground" /><h1 className="mt-4 text-xl font-semibold">Manager access required</h1><p className="mt-2 text-sm text-muted-foreground">Customer records are available to managers.</p></section>;
+  }
+
   const { searchText } = await searchParams;
 
   const results = searchText ? await (async () => {

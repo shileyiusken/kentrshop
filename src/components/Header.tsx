@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardList, LogOut, UsersRound, Wrench } from "lucide-react";
+import { ClipboardClock, ClipboardList, LogOut, ShieldCheck, UsersRound, Wrench } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,16 @@ const navigation = [
   { href: "/customers", label: "Customers", icon: UsersRound },
 ];
 
-function NavigationLinks({ mobile = false }: { mobile?: boolean }) {
+function NavigationLinks({ mobile = false, isManager = false, hasRole = true }: { mobile?: boolean; isManager?: boolean; hasRole?: boolean }) {
   const pathname = usePathname();
+  const baseLinks = hasRole ? (isManager ? navigation : [navigation[0]]) : [];
+  const links = isManager
+    ? [...baseLinks, { href: "/roles", label: "Team & roles", icon: ShieldCheck }, { href: "/audit", label: "Audit trail", icon: ClipboardClock }]
+    : baseLinks;
 
   return (
-    <nav aria-label="Main navigation" className={cn(mobile ? "flex w-full gap-2" : "space-y-1")}>
-      {navigation.map(({ href, label, icon: Icon }) => {
+    <nav aria-label="Main navigation" className={cn(mobile ? "grid w-full grid-cols-2 gap-2" : "space-y-1")}>
+      {links.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
 
         return (
@@ -28,7 +32,7 @@ function NavigationLinks({ mobile = false }: { mobile?: boolean }) {
             aria-current={active ? "page" : undefined}
             className={cn(
               "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-              mobile ? "min-w-0 flex-1 justify-center" : "",
+              mobile ? "min-w-0 justify-center" : "",
               active
                 ? "bg-white/12 text-white shadow-sm"
                 : "text-slate-300 hover:bg-white/8 hover:text-white",
@@ -44,7 +48,7 @@ function NavigationLinks({ mobile = false }: { mobile?: boolean }) {
   );
 }
 
-export default function Header() {
+export default function Header({ isManager = false, hasRole = true }: { isManager?: boolean; hasRole?: boolean }) {
   return (
     <header className="workshop-sidebar flex shrink-0 flex-col border-b border-slate-700/70 bg-slate-950 text-white lg:sticky lg:top-0 lg:h-screen lg:w-[264px] lg:border-b-0 lg:border-r">
       <div className="flex items-center justify-between px-5 py-4 lg:px-6 lg:pb-8 lg:pt-7">
@@ -67,11 +71,11 @@ export default function Header() {
 
       <div className="hidden px-4 lg:block">
         <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Workspace</p>
-        <NavigationLinks />
+        <NavigationLinks isManager={isManager} hasRole={hasRole} />
       </div>
 
       <div className="px-4 pb-4 lg:hidden">
-        <NavigationLinks mobile />
+        <NavigationLinks mobile isManager={isManager} hasRole={hasRole} />
       </div>
 
       <div className="mt-auto hidden p-4 lg:block">

@@ -8,6 +8,20 @@
       "when": 1739197680807,
       "tag": "0000_dazzling_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793604702671,
+      "tag": "0001_audit_trail",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793605736770,
+      "tag": "0002_staff_roles",
+      "breakpoints": true
     }
   ]
 }

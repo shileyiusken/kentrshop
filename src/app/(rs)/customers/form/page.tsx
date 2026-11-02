@@ -2,7 +2,7 @@ import { BackButton } from "@/components/BackButton";
 import { getCustomer } from "@/lib/queries/getCustomer";
 import * as Sentry from "@sentry/nextjs";
 import CustomerForm from "./CustomerForm";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getCurrentStaff } from "@/lib/staff";
 
 export async function generateMetadata({
   searchParams,
@@ -22,9 +22,11 @@ export default async function CustomerFormPage({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   try {
-    const {getPermission} = getKindeServerSession()
-    const managerPermission = await getPermission("manager")
-    const isManager = managerPermission?.isGranted
+    const staff = await getCurrentStaff();
+    const isManager = staff?.role === "manager";
+    if (!isManager) {
+      return <><h2 className="mb-2 text-2xl">Manager access is required to manage customer records.</h2><BackButton title="Go Back" variant="default" /></>;
+    }
 
     const { customerId } = await searchParams;
 

@@ -4,8 +4,11 @@ import { getTicket } from "@/lib/queries/getTicket";
 import * as Sentry from "@sentry/nextjs";
 import TicketForm from "./TicketForm";
 
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { Users, init as kindeInit } from "@kinde/management-api-js";
+import { getCurrentStaff } from "@/lib/staff";
+import { listKindeUsers } from "@/lib/kinde-users";
+import { db } from "@/db";
+import { staffRoles } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 
 export async function generateMetadata({
@@ -50,12 +53,8 @@ export default async function TicketFormPage({
       );
     }
 
-    const { getPermission, getUser } = getKindeServerSession();
-    const [managerPermission, user] = await Promise.all([
-      getPermission("manager"),
-      getUser(),
-    ]);
-    const isManager = managerPermission?.isGranted;
+    const staff = await getCurrentStaff();
+    const isManager = staff?.role === "manager";
 
     // New ticket form
     if (customerId) {
@@ -83,12 +82,23 @@ export default async function TicketFormPage({
         );
       }
 
-      if (isManager) {
-        kindeInit(); //Initialize Kinde management API
-        const { users } = await Users.getUsers();
+      if (!isManager) {
+        return <><h2 className="mb-2 text-2xl">Manager access is required to create a ticket.</h2><BackButton title="Go Back" variant="default" /></>;
+      }
 
+      if (isManager) {
+        const users = await listKindeUsers();
+        const roleAssignments = await db
+          .select({ email: staffRoles.email })
+          .from(staffRoles)
+          .where(eq(staffRoles.role, "technician"));
+        const technicianEmails = new Set(roleAssignments.map((item) => item.email.toLowerCase()));
         const techs = users
-          ? users.map((user) => ({ id: user.email!, description: user.email! }))
+          ? users
+              .filter((user): user is typeof user & { email: string } =>
+                typeof user.email === "string" && technicianEmails.has(user.email.toLowerCase()),
+              )
+              .map((user) => ({ id: user.email.toLowerCase(), description: user.email.toLowerCase() }))
           : [];
 
         return (
@@ -100,6 +110,9 @@ export default async function TicketFormPage({
     }
 
     if (ticketId) {
+      if (!staff) {
+        return <><h2 className="mb-2 text-2xl">A staff role is required to open this ticket.</h2><BackButton title="Go Back" variant="default" /></>;
+      }
       const ticket = await getTicket(parseInt(ticketId));
 
       if (!ticket) {
@@ -112,14 +125,17 @@ export default async function TicketFormPage({
       const customer = await getCustomer(ticket.customerId);
 
       if (isManager) {
-        kindeInit(); //Initialize Kinde management API
-        const { users } = await Users.getUsers();
-
+        const users = await listKindeUsers();
+        const roleAssignments = await db
+          .select({ email: staffRoles.email })
+          .from(staffRoles)
+          .where(eq(staffRoles.role, "technician"));
+        const technicianEmails = new Set(roleAssignments.map((item) => item.email.toLowerCase()));
         const techs = users
           ? users
               .filter(
                 (user): user is { email: string } =>
-                  typeof user.email === "string"
+                  typeof user.email === "string" && technicianEmails.has(user.email.toLowerCase())
               )
               .map((user) => ({
                 id: user.email?.toLowerCase(),
@@ -137,7 +153,7 @@ export default async function TicketFormPage({
         );
       } else {
         const isEditable =
-          user?.email?.toLowerCase() === ticket.tech.toLowerCase();
+          staff.role === "technician" && staff.user.email?.toLowerCase() === ticket.tech.toLowerCase();
         return (
           <TicketForm
             customer={customer}
